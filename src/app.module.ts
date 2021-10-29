@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Event } from './events/event.entity';
 import { EventsController } from './events/events.controller';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -17,11 +18,10 @@ import { EventsController } from './events/events.controller';
       entities: [Event],
       synchronize: true,
   }),
-    TypeOrmModule.forFeature([
-      Event
-    ])
+   
+    EventsModule
   ],
-  controllers: [AppController, EventsController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
