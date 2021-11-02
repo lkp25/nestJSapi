@@ -7,26 +7,39 @@ import {
   Param,
   Post,
   Patch,
+  Logger,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Like, MoreThan, Repository } from 'typeorm';
+import { Attendee } from './attendee.entity';
 import { CreateEventDto } from './create-Event.dto';
 import { Event } from './event.entity';
 import { UpdateEventDto } from './update-Events.dto';
 
 @Controller('events')
 export class EventsController {
-  constructor(
+  private readonly logger = new Logger(EventsController.name)
+
+  constructor(    
     @InjectRepository(Event)
     private readonly repository: Repository<Event>,
+    @InjectRepository(Attendee)
+    private readonly attendeeRepository: Repository<Attendee>
+
   ) {}
 
   @Get()
   async findAll() {
     // return this.events;
-    return await this.repository.find();
+    this.logger.log('hit the findAll route')
+    const result = await this.repository.find();
+    this.logger.debug(`found ${result.length} records`)
+    return result
   }
+
   @Get('/practice')
   async practice() {
     return await this.repository.find({
@@ -46,10 +59,35 @@ export class EventsController {
     });
   }
 
+  @Get('/practice2')
+  async practice2(){
+    // return await this.repository.findOne(7, {
+    //   relations: ['attendees']
+    // })
+    //wez z bazy event razem z uczestnikami
+    const event =  await this.repository.findOne(7, {
+      relations: ['attendees']
+    })
+    //stworz nowego uczestnika, dodaj jego atrybuty, jako event daj znaleziony event wyzej
+    const attendee = new Attendee()
+    attendee.name = 'jerssry'
+    // attendee.event = event
+    //wrzuc uczestnika do arraya i zapisz repo. 
+    //poniewaz jest opcja cascade:true, to sie zapisze wszystko wszedzie.
+    event.attendees.push(attendee)
+    return await this.repository.save(event)
+    //jakby nie bylo kaskadowania:
+    // await this.attendeeRepository.save(attendee)
+  }
+
   @Get(':id')
   async findOne(@Param('id') id) {
     // return this.events.find((event) => event.id === +id);
-    return await this.repository.findOne(id);
+    const result = await this.repository.findOne(id);
+    if(!result){
+      throw new NotFoundException()
+    }
+    return result
   }
   @Post()
   async create(@Body() input: CreateEventDto) {
@@ -73,6 +111,9 @@ export class EventsController {
     // const index = this.events.findIndex((event) => event.id === +id);
     //copy old values, replace if new are provided and insert new object in the same place
     const original = await this.repository.findOne(id);
+    if(!original){
+      throw new NotFoundException()
+    }
 
     return await this.repository.save({
       ...original,
@@ -87,7 +128,11 @@ export class EventsController {
   async remove(@Param('id') id) {
     //easy using filter - just put out the one element with given id, keep rest.
     // this.events = this.events.filter((event) => event.id !== +id);
-    const event = await this.repository.findOne(id);
-    await this.repository.remove(event);
+   
+    const result = await this.repository.findOne(id);
+    if(!result){
+      throw new NotFoundException()
+    }
+    await this.repository.remove(result);
   }
 }

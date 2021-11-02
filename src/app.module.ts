@@ -2,9 +2,13 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { Attendee } from './events/attendee.entity';
 import { Event } from './events/event.entity';
 import { EventsController } from './events/events.controller';
 import { EventsModule } from './events/events.module';
+import { SchoolModule } from './school/school.module';
+import { Subject } from './school/subject.entity';
+import { Teacher } from './school/teacher.entity';
 
 @Module({
   imports: [
@@ -15,11 +19,12 @@ import { EventsModule } from './events/events.module';
       username: 'root',
       password: 'pass',
       database: 'test',
-      entities: [Event],
+      entities: [Event, Attendee, Subject, Teacher],
       synchronize: true,
+      autoLoadEntities: true
   }),
    
-    EventsModule
+    EventsModule, SchoolModule
   ],
   controllers: [AppController],
   providers: [AppService],
