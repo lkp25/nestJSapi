@@ -1,6 +1,13 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Event } from "./event.entity";
 
+
+export enum attendeeAnswerEnum {
+    Accepted = 1,
+    Maybe,
+    Rejected
+  }
+
 @Entity()
 export class Attendee{
     @PrimaryGeneratedColumn()
@@ -16,4 +23,10 @@ export class Attendee{
         // referencedColumnName: 'when'
     })
     event: Event
+    
+    @Column('enum', {
+        enum: attendeeAnswerEnum,
+        default: attendeeAnswerEnum.Accepted
+    })
+    answer: attendeeAnswerEnum
 }

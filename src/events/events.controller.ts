@@ -10,15 +10,17 @@ import {
   Logger,
   Injectable,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Like, MoreThan, Repository } from 'typeorm';
 import { Attendee } from './attendee.entity';
-import { CreateEventDto } from './create-Event.dto';
+import { CreateEventDto } from './input/create-Event.dto';
 import { Event } from './event.entity';
 import { EventService } from './event.service';
-import { UpdateEventDto } from './update-Events.dto';
+import { UpdateEventDto } from './input/update-Events.dto';
+import { ListEvents } from './input/list.events';
 
 @Controller('events')
 export class EventsController {
@@ -33,12 +35,13 @@ export class EventsController {
   ) {}
 
   @Get()
-  async findAll() {
-    // return this.events;
+  async findAll(@Query() filter: ListEvents) {
+    
     this.logger.log('hit the findAll route')
-    const result = await this.repository.find();
-    this.logger.debug(`found ${result.length} records`)
-    return result
+    const events = await this.eventsService
+      .getEventsWithAttendeeCountFiltered(filter);
+    this.logger.debug(`found ${events?.length} records`)
+    return events
   }
 
   @Get('/practice')
