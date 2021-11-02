@@ -8,4 +8,5 @@ export enum WhenEventFilter{
 
 export class ListEvents{
     when? : WhenEventFilter
+    page: number = 1
 }

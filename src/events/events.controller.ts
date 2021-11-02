@@ -11,6 +11,8 @@ import {
   Injectable,
   NotFoundException,
   Query,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -35,13 +37,18 @@ export class EventsController {
   ) {}
 
   @Get()
+  @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(@Query() filter: ListEvents) {
-    
-    this.logger.log('hit the findAll route')
     const events = await this.eventsService
-      .getEventsWithAttendeeCountFiltered(filter);
-    this.logger.debug(`found ${events?.length} records`)
-    return events
+      .getEventsWithAttendeeCountFilteredPaginated(
+        filter,
+        {
+          total: true,
+          currentPage: filter.page,
+          limit: 2
+        }
+      );
+    return events;
   }
 
   @Get('/practice')
