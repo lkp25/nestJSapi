@@ -131,6 +131,7 @@ export class EventsController {
   async remove(@Param('id') id) {   
    
     const result = await this.eventsService.deleteEvent(id);
+    //not found in the db? 404!
     if(result?.affected !== 1){
       throw new NotFoundException()
 
