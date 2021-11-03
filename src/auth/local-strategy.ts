@@ -9,7 +9,7 @@ export class LocalStrategy extends PassportStrategy(Strategy){
     private readonly logger = new Logger(LocalStrategy.name)
 
     constructor(
-        private readonly userRepository: Repository<User>
+        // private readonly userRepository: Repository<User>
     ){
         super() // this is inheritance so must call super!
     }
@@ -19,21 +19,21 @@ export class LocalStrategy extends PassportStrategy(Strategy){
         password: string
     ): Promise<any>
     {
-        const user = await this.userRepository.findOne({
-            where: {username: username}
-        })
-        if(!user){
-            this.logger.debug(`user ${username} not found`)
-            throw new UnauthorizedException
-        }
-        if(password !== user.password){
-            this.logger.debug(`wrong pass`)
-            throw new UnauthorizedException
+        // const user = await this.userRepository.findOne({
+        //     where: {username: username}
+        // })
+        // if(!user){
+        //     this.logger.debug(`user ${username} not found`)
+        //     throw new UnauthorizedException
+        // }
+        // if(password !== user.password){
+        //     this.logger.debug(`wrong pass`)
+        //     throw new UnauthorizedException
             
-        }
-        return {
-            ...user,
-            password: 'hihihihihihihihi'
-        }
+        // }
+        // return {
+        //     ...user,
+        //     password: 'hihihihihihihihi'
+        // }
     }
 }
