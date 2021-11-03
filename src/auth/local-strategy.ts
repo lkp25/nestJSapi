@@ -37,6 +37,7 @@ export class LocalStrategy extends PassportStrategy(Strategy){
         }
         return {
             ...user,
+            //will not show either way as this is only a middleware
             password: 'hihihihihihihihi'
         }
     }

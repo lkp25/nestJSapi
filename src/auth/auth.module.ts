@@ -7,6 +7,7 @@ import { AuthService } from "./auth.service";
 import { JwtStrategy } from "./jwt-strategy";
 import { LocalStrategy } from "./local-strategy";
 import { User } from "./user.entity";
+import { UserController } from "./users.constroller";
 
 @Module({
     //to be able to inject User repository
@@ -23,7 +24,7 @@ import { User } from "./user.entity";
         })
     ],
     providers: [LocalStrategy, AuthService, JwtStrategy],
-    controllers: [AuthController]
+    controllers: [AuthController, UserController]
 })
 export class AuthModule{
 
