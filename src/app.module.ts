@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { Profile } from './auth/profile.entity';
 import { User } from './auth/user.entity';
 import { Attendee } from './events/attendee.entity';
@@ -26,7 +27,7 @@ import { Teacher } from './school/teacher.entity';
       autoLoadEntities: true
   }),
    
-    EventsModule, SchoolModule
+    EventsModule, SchoolModule, AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
