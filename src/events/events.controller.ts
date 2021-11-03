@@ -106,20 +106,12 @@ export class EventsController {
       ...input,
       when: new Date(input.when),
     });
-    // const event = {
-    //   ...input,
-    //   when: new Date(input.when),
-    //   id: this.events.length + 1,
-    // };
-    // this.events.push(event);
-
-    // return event;
+    
   }
 
   @Patch(':id')
   async update(@Param('id') id, @Body() input: UpdateEventDto) {
-    //find index of item to update
-    // const index = this.events.findIndex((event) => event.id === +id);
+    
     //copy old values, replace if new are provided and insert new object in the same place
     const original = await this.repository.findOne(id);
     if(!original){
@@ -136,9 +128,7 @@ export class EventsController {
 
   @Delete(':id')
   @HttpCode(204)
-  async remove(@Param('id') id) {
-    //easy using filter - just put out the one element with given id, keep rest.
-    // this.events = this.events.filter((event) => event.id !== +id);
+  async remove(@Param('id') id) {   
    
     const result = await this.repository.findOne(id);
     if(!result){
