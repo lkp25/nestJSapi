@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/auth/user.entity';
 import { paginate, PaginateOptions } from 'src/pagination/paginator';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, Repository, SelectQueryBuilder } from 'typeorm';
 import { attendeeAnswerEnum } from './attendee.entity';
 import { Event, PaginatedEvents } from './event.entity';
 import { CreateEventDto } from './input/create-Event.dto';
@@ -16,14 +16,17 @@ export class EventService {
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
   ) {}
-  private getEventsBaseQuery() {
+
+
+
+  private getEventsBaseQuery(): SelectQueryBuilder<Event> {
     return this.eventRepository
       .createQueryBuilder('e') //alias for 'event' table
       .orderBy('e.id', 'DESC');
   }
 
   //how many attendees an event has?
-  public getEventWithAttendeeCountQuery() {
+  public getEventWithAttendeeCountQuery(): SelectQueryBuilder<Event>{
     return this.getEventsBaseQuery()
       .loadRelationCountAndMap(
         'e.attendeeCount',
@@ -65,15 +68,15 @@ export class EventService {
     paginateOptions: PaginateOptions
   ): Promise<PaginatedEvents> {
     return await paginate(
-      await this.getEventsWithAttendeeCountFiltered(filter),
+      await this.getEventsWithAttendeeCountFilteredQuery(filter),
       paginateOptions
     );
   }
 
 
-  private async getEventsWithAttendeeCountFiltered(
+  private getEventsWithAttendeeCountFilteredQuery(
     filter?: ListEvents
-  ) {
+  ): SelectQueryBuilder<Event>{
     let query = this.getEventWithAttendeeCountQuery();
 
     if (!filter) {
@@ -105,7 +108,7 @@ export class EventService {
     return query;
   }
 
-  public async getEvent(id: number): Promise<Event> | undefined {
+  public async getEventWithAttendeeCount(id: number): Promise<Event> | undefined {
     const query = this.getEventWithAttendeeCountQuery().andWhere('e.id = :id', {
       id,
     });
@@ -149,7 +152,7 @@ export class EventService {
     )
   }
 
-  private getEventsOrganizedByUserIdQuery(userId: number){
+  private getEventsOrganizedByUserIdQuery(userId: number): SelectQueryBuilder<Event>{
     return this.getEventsBaseQuery()
     .where('e.organizerId = :userId', {userId})
   }
@@ -164,7 +167,7 @@ export class EventService {
     )
   }
 
-  private getEventsAttendedByUserIdQuery(userId: number){
+  private getEventsAttendedByUserIdQuery(userId: number): SelectQueryBuilder<Event>{
     return this.getEventsBaseQuery()
     .leftJoinAndSelect('e.attendees', 'a')//'a' is alias for this relation-attendee
     .where('a.userId = :userId', { userId })

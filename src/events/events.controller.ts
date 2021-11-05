@@ -107,7 +107,7 @@ export class EventsController {
   @UseInterceptors(ClassSerializerInterceptor)
   async findOne(@Param('id') id) {
     // return this.events.find((event) => event.id === +id);
-    const result = await this.eventsService.getEvent(id);
+    const result = await this.eventsService.getEventWithAttendeeCount(id);
     if (!result) {
       throw new NotFoundException();
     }
@@ -157,7 +157,7 @@ export class EventsController {
       throw new NotFoundException();
     }
 
-    //only creator of event can modify it!
+    //only creator of event can delete it!
     if (original.organizerId !== user.id) {
       throw new ForbiddenException(null, 'only creator can remove this event');
     }
