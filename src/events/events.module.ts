@@ -9,10 +9,12 @@ import { EventAttendeesController } from './event-attendees.controller';
 import { EventsOrganizedByUserController } from './events-organized-by-user.controller';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Event, Attendee]),
+  imports: [TypeOrmModule.forFeature([Event, Attendee])],
+  controllers: [
+    EventsController,
+    EventAttendeesController,
+    EventsOrganizedByUserController,
   ],
-  controllers: [EventsController, EventAttendeesController, EventsOrganizedByUserController],
-  providers: [EventService, AttendeeService]
+  providers: [EventService, AttendeeService],
 })
-export class EventsModule { }
+export class EventsModule {}

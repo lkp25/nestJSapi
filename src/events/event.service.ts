@@ -139,6 +139,7 @@ export class EventService {
     });
   }
 
+  //organized by
   public async getEventsOrganizedByUserIdPaginated(
     userId: number, paginateOptions: PaginateOptions
   ): Promise<PaginatedEvents>{
@@ -151,5 +152,21 @@ export class EventService {
   private getEventsOrganizedByUserIdQuery(userId: number){
     return this.getEventsBaseQuery()
     .where('e.organizerId = :userId', {userId})
+  }
+
+  //attended by
+  public async getEventsAttendedByUserIdPaginated(
+    userId: number, paginateOptions: PaginateOptions
+  ): Promise<PaginatedEvents>{
+    return await paginate<Event>(
+      this.getEventsAttendedByUserIdQuery(userId),
+      paginateOptions
+    )
+  }
+
+  private getEventsAttendedByUserIdQuery(userId: number){
+    return this.getEventsBaseQuery()
+    .leftJoinAndSelect('e.attendees', 'a')//'a' is alias for this relation-attendee
+    .where('a.userId = :userId', { userId })
   }
 }
