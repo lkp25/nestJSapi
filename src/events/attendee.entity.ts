@@ -1,3 +1,4 @@
+import { User } from "src/auth/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Event } from "./event.entity";
 
@@ -23,10 +24,19 @@ export class Attendee{
         // referencedColumnName: 'when'
     })
     event: Event
+
+    @Column() //relation to event entity
+    eventId: number
     
     @Column('enum', {
         enum: attendeeAnswerEnum,
         default: attendeeAnswerEnum.Accepted
     })
     answer: attendeeAnswerEnum
+
+    @ManyToOne(()=> User, (user)=>user.attended)
+    user: User
+
+    @Column()   //relation to User entity
+    userId: number
 }

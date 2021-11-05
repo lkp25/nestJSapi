@@ -1,13 +1,17 @@
+import { Expose } from 'class-transformer';
 import { User } from 'src/auth/user.entity';
+import { PaginationResult } from 'src/pagination/paginator';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Attendee } from './attendee.entity';
 
 
 @Entity({name: 'events'})
 export class Event {
+  @Expose()
   @PrimaryGeneratedColumn()
   id: string;
 
+  @Expose()
   @Column()
   name: string;
 
@@ -40,3 +44,5 @@ export class Event {
   @Column({nullable: true})
   organizerId: number
 }
+
+export type PaginatedEvents = PaginationResult<Event>

@@ -8,12 +8,17 @@ import {
   Post,
   Patch,
   Logger,
-  Injectable,
+  
   NotFoundException,
   Query,
   UsePipes,
   ValidationPipe,
   UseGuards,
+  
+  ForbiddenException,
+  SerializeOptions,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -29,28 +34,31 @@ import { User } from 'src/auth/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('events')
+@SerializeOptions({
+  strategy: 'excludeAll'
+})
 export class EventsController {
-  private readonly logger = new Logger(EventsController.name)
+  private readonly logger = new Logger(EventsController.name);
 
-  constructor(    
+  constructor(
     @InjectRepository(Event)
     private readonly repository: Repository<Event>,
     @InjectRepository(Attendee)
     private readonly attendeeRepository: Repository<Attendee>,
-    private readonly eventsService: EventService
+    private readonly eventsService: EventService,
   ) {}
 
   @Get()
   @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(@Query() filter: ListEvents) {
-    const events = await this.eventsService
-      .getEventsWithAttendeeCountFilteredPaginated(
+    const events =
+      await this.eventsService.getEventsWithAttendeeCountFilteredPaginated(
         filter,
         {
           total: true,
           currentPage: filter.page,
-          limit: 2
-        }
+          limit: 2,
+        },
       );
     return events;
   }
@@ -75,73 +83,90 @@ export class EventsController {
   }
 
   @Get('/practice2')
-  async practice2(){
+  async practice2() {
     // return await this.repository.findOne(7, {
     //   relations: ['attendees']
     // })
     //wez z bazy event razem z uczestnikami
-    const event =  await this.repository.findOne(7, {
-      relations: ['attendees']
-    })
+    const event = await this.repository.findOne(7, {
+      relations: ['attendees'],
+    });
     //stworz nowego uczestnika, dodaj jego atrybuty, jako event daj znaleziony event wyzej
-    const attendee = new Attendee()
-    attendee.name = 'jerssry'
+    const attendee = new Attendee();
+    attendee.name = 'jerssry';
     // attendee.event = event
-    //wrzuc uczestnika do arraya i zapisz repo. 
+    //wrzuc uczestnika do arraya i zapisz repo.
     //poniewaz jest opcja cascade:true, to sie zapisze wszystko wszedzie.
-    event.attendees.push(attendee)
-    return await this.repository.save(event)
+    event.attendees.push(attendee);
+    return await this.repository.save(event);
     //jakby nie bylo kaskadowania:
     // await this.attendeeRepository.save(attendee)
   }
 
   @Get(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   async findOne(@Param('id') id) {
     // return this.events.find((event) => event.id === +id);
     const result = await this.eventsService.getEvent(id);
-    if(!result){
-      throw new NotFoundException()
+    if (!result) {
+      throw new NotFoundException();
     }
-    return result
+    return result;
   }
   @Post()
   @UseGuards(AuthGuard('jwt'))
   async create(
     @Body() input: CreateEventDto,
     //use custom deco to get the user
-    @currentUser() user: User
-    ) {
-    return this.eventsService.createEvent(input, user)
+    @currentUser() user: User,
+  ) {
+    return this.eventsService.createEvent(input, user);
   }
 
   @Patch(':id')
-  async update(@Param('id') id, @Body() input: UpdateEventDto) {
-    
+  @UseGuards(AuthGuard('jwt'))
+  async update(
+    @Param('id') id,
+    @Body() input: UpdateEventDto,
+    @currentUser() user: User,
+  ) {
     //copy old values, replace if new are provided and insert new object in the same place
     const original = await this.repository.findOne(id);
-    if(!original){
-      throw new NotFoundException()
+    if (!original) {
+      throw new NotFoundException();
     }
 
-    return await this.repository.save({
-      ...original,
-      ...input,
-      //replace the date if provided, else keep original one
-      when: input.when ? new Date(input.when) : original.when,
-    });
+    //only creator of event can modify it!
+    if (original.organizerId !== user.id) {
+      throw new ForbiddenException(null, 'only creator can modify this event');
+    }
+
+    return await this.eventsService.updateEvent(input, original)
   }
 
   @Delete(':id')
   @HttpCode(204)
-  async remove(@Param('id') id) {   
-   
-    const result = await this.eventsService.deleteEvent(id);
-    //not found in the db? 404!
-    if(result?.affected !== 1){
-      throw new NotFoundException()
-
+  @UseGuards(AuthGuard('jwt'))
+  async remove(
+    @Param('id') id,
+    @currentUser() user: User
+    ) {
+    //copy old values, replace if new are provided and insert new object in the same place
+    const original = await this.repository.findOne(id);
+    if (!original) {
+      throw new NotFoundException();
     }
-    
-    
+
+    //only creator of event can modify it!
+    if (original.organizerId !== user.id) {
+      throw new ForbiddenException(null, 'only creator can remove this event');
+    }
+
+    await this.eventsService.deleteEvent(id);
+    //not found in the db? 404!
+    // if(result?.affected !== 1){
+    //   throw new NotFoundException()
+
+    // }
   }
 }

@@ -7,6 +7,7 @@ import { attendeeAnswerEnum } from './attendee.entity';
 import { Event } from './event.entity';
 import { CreateEventDto } from './input/create-Event.dto';
 import { ListEvents, WhenEventFilter } from './input/list.events';
+import { UpdateEventDto } from './input/update-Events.dto';
 
 @Injectable()
 export class EventService {
@@ -126,6 +127,15 @@ export class EventService {
       ...input,
       organizer: user,
       when: new Date(input.when),
+    });
+  }
+
+  public async updateEvent(input: UpdateEventDto, original: Event): Promise<Event>{
+    return  await this.eventRepository.save({
+      ...original,
+      ...input,
+      //replace the date if provided, else keep original one
+      when: input.when ? new Date(input.when) : original.when,
     });
   }
 }
