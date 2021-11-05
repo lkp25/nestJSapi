@@ -17,7 +17,7 @@ export class UserController {
   async create(@Body() createUserDto: CreateUserDto) {
     const user = new User();
 
-    if (createUserDto.password !== createUserDto.retypedpassword) {
+    if (createUserDto.password !== createUserDto.retypedPassword) {
       throw new BadRequestException(['passwords do not match']);
     }
 

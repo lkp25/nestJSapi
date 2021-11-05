@@ -93,7 +93,7 @@ export class EventsController {
     });
     //stworz nowego uczestnika, dodaj jego atrybuty, jako event daj znaleziony event wyzej
     const attendee = new Attendee();
-    attendee.name = 'jerssry';
+    // attendee.name = 'jerssry';
     // attendee.event = event
     //wrzuc uczestnika do arraya i zapisz repo.
     //poniewaz jest opcja cascade:true, to sie zapisze wszystko wszedzie.
@@ -156,9 +156,10 @@ export class EventsController {
     if (!original) {
       throw new NotFoundException();
     }
-
+    
     //only creator of event can delete it!
     if (original.organizerId !== user.id) {
+      this.logger.debug('delete', 'contonton')
       throw new ForbiddenException(null, 'only creator can remove this event');
     }
 

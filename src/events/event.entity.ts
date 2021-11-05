@@ -15,15 +15,19 @@ export class Event {
   @Column()
   name: string;
 
+  @Expose()
   @Column()
   description: string;
 
+  @Expose()
   @Column()
   when: Date;
   
+  @Expose()
   @Column()
   address: string;
 
+  @Expose()
   @OneToMany(()=> Attendee, (attendee)=> attendee.event, {
     // eager: true
     cascade: true
@@ -35,12 +39,14 @@ export class Event {
   attendeeMaybe?: number
   attendeeRejected?: number
 
+  @Expose()
   @ManyToOne(()=> User, (user)=> user.organized)
   @JoinColumn({
     name: 'organizerId'
   })
   organizer: User
 
+  @Expose()
   @Column({nullable: true})
   organizerId: number
 }

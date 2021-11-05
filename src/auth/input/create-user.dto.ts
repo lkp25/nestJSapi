@@ -8,7 +8,7 @@ export class CreateUserDto{
     password: string
     
     @Length(5)
-    retypedpassword: string
+    retypedPassword: string
 
     @Length(5)
     firstName: string
