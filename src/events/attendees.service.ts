@@ -8,4 +8,11 @@ export class AttendeeService{
         private readonly attendeeRepository: Repository<Attendee>
 
     ){}
+
+    public async findByEventId(eventId: number): Promise<Attendee[]>{
+        return await this.attendeeRepository.find({
+            where:{ event: {id: eventId}}
+        }          
+        )
+    }
 }
